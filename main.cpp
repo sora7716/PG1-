@@ -23,13 +23,6 @@ typedef struct GameObject {
 	int isAlive; //生存フラグ
 }GameObject;
 
-//敵のアニメーション種類
-enum EnemyAnimationType : int {
-	kSpawn,//リスポーン
-	kDead,//死亡
-	kEnemyAnimationCount //アニメーションの種類の数
-};
-
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -70,7 +63,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	enemy.isAlive = true;//生存フラグ
 	float enemyForTheta = 0.0f;//敵のθ
 	float enemyForAmplitude = static_cast<float>(kWindowWidth / 2) - enemy.radius;//敵の振幅
-	float enemyResupawnTimer = 0.0f;//敵のリスポーンタイマー
+	float enemyRespawnTimer = 0.0f;//敵のリスポーンタイマー
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -144,8 +137,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 		}
 		///
-	    ///↑弾
-	    ///
+		///↑弾
+		///
 
 		///
 		///↓敵
@@ -155,19 +148,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//サイン波で動くように
 			enemyForTheta += static_cast<float>(M_PI) / 120.0f;
 			enemy.position.x = sinf(enemyForTheta) * enemyForAmplitude + static_cast<float>(kWindowWidth / 2);
-			
+
 		} else {
 			//存在していなかったらリスポーンタイマーをカウントダウン
-			if (enemyResupawnTimer > 0.0f) {
-				enemyResupawnTimer--;
+			if (enemyRespawnTimer > 0.0f) {
+				enemyRespawnTimer--;
 			} else {
 				enemy.isAlive = true; //生存フラグを立てる
-			
+
 			}
 		}
 		///
-	    ///↑敵
-	    ///
+		///↑敵
+		///
 
 		///
 		///↓衝突判定
@@ -178,12 +171,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Vector2  enemyToBulletDistance = { enemy.position.x - bullet.position.x,enemy.position.y - bullet.position.y };
 			//敵と弾の距離の長さを計算
 			float enemyToBulletLen = sqrtf(powf(enemyToBulletDistance.x, 2.0f) + powf(enemyToBulletDistance.y, 2.0f));
-			
+
 			//衝突していたら
 			if (enemyToBulletLen < enemy.radius + bullet.radius) {
 				enemy.isAlive = false; //敵の生存フラグを折る
 				bullet.isAlive = false; //弾の生存フラグを折る
-				enemyResupawnTimer = 120.0f; //リスポーンタイマーをセット
+				enemyRespawnTimer = 120.0f; //リスポーンタイマーをセット
 			}
 		}
 		///
@@ -201,15 +194,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		///プレイヤー
 		///
-		Novice::DrawBox(
-			static_cast<int>(player.position.x - player.radius),
-			static_cast<int>(player.position.y - player.radius),
-			static_cast<int>(player.radius * 2.0f),
-			static_cast<int>(player.radius * 2.0f),
-			0.0f,
-			player.color,
-			kFillModeSolid
-		);
+		if (player.isAlive) {
+			Novice::DrawBox(
+				static_cast<int>(player.position.x - player.radius),
+				static_cast<int>(player.position.y - player.radius),
+				static_cast<int>(player.radius * 2.0f),
+				static_cast<int>(player.radius * 2.0f),
+				0.0f,
+				player.color,
+				kFillModeSolid
+			);
+		}
 
 		///
 		///弾
